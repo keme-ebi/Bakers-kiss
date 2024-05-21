@@ -3,7 +3,7 @@ Application factory to help create multiple instances of the application
 """
 from flask import Flask
 from flask_restx import Api
-from .orders.views import order
+from .users.views import user
 from .auth.views import auth
 from .config.config import config_dict
 
@@ -15,7 +15,7 @@ def create_app(config=config_dict['dev']):
 
     api = Api(app)
 
-    api.add_namespace(order)
+    api.add_namespace(user)
     api.add_namespace(auth, path='/auth')
 
     return app
