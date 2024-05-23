@@ -5,6 +5,7 @@ from http import HTTPStatus
 from datetime import datetime
 from ..models.orders import Order
 from ..models.user import User
+from ..utils import db
 
 orders = Namespace('orders', description="orders namespace")
 
@@ -58,7 +59,7 @@ class Orders(Resource):
     @jwt_required()
     def post(self):
         """
-        Creates a new order for user
+        Creates a new order for an authorized user
         """
         username = get_jwt_identity()
 
@@ -95,7 +96,7 @@ class OneOrder(Resource):
     @jwt_required()
     def get(self, order_id):
         """
-        Displays a particular order
+        Displays a particular order of an authorized user
         Args:
             order_id(int): id to get specific order
         """
@@ -110,20 +111,49 @@ class OneOrder(Resource):
 
         return order, HTTPStatus.OK
 
-    @orders.expect(place_order_model)
+    @orders.expect(order_model)
+    @orders.marshal_with(order_model)
     @jwt_required()
     def put(self, order_id):
         """
-        Updates a particular order
+        Updates a particular order of an authorized user
         Args:
             order_id(int): id to get specific order to update
         """
-        pass
+        update_order = Order.query.filter_by(order_id=order_id).first()
 
+        data = orders.payload
+
+        due_date = datetime.strptime(data.get('due_date'), '%Y-%m-%d').date()
+
+        if 'client' in data:
+            update_order.client = data['client']
+        if 'order_title' in data:
+            update_order.order_title = data['order_title']
+        if 'descripton' in data:
+            update_order.description = data['description']
+        if 'price' in data:
+            update_order.price = data['price']
+        if 'due_date' in data:
+            update_order.due_date = due_date
+
+        db.session.commit()
+
+        return update_order, HTTPStatus.OK
+
+    @orders.marshal_with(order_model)
+    @jwt_required()
     def delete(self, order_id):
         """
-        Deletes a particular order
+        Deletes a particular order of an authorized user
         Args:
             order_id(int): id to get specific order to delete
         """
-        pass
+        order = Order.query.filter_by(order_id=order_id).first()
+        
+        if order:
+            order.delete()
+
+            return order, HTTPStatus.NO_CONTENT
+        
+        return {'message': 'Order Not Found'}, HTTPStatus.NOT_FOUND
