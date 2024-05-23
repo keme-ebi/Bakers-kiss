@@ -79,8 +79,9 @@ class Login(Resource):
             }
 
             return response, HTTPStatus.OK
-        
 
+
+# This route can only be accessed if the user is authenticated
 @auth.route('/refresh')
 class RefreshToken(Resource):
     @jwt_required(refresh=True)

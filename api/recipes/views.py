@@ -1,10 +1,21 @@
-from flask_restx import Namespace, Resource
+from flask_restx import Namespace, Resource, fields
+from ..models.recipes import Recipe
 
 recipes = Namespace('recipes', description="recipes namespace")
 
+recipe_model = recipes.model(
+    'Recipes', {
+        'id': fields.Integer(description="id of the recipe"),
+        'pastry_name': fields.String(required=True, description="the name of pastry"),
+        'recipe': fields.String(required=True, description="instructions on how to make the pastry"),
+        'created_at': fields.DateTime(readonly=True, description="date recipe was entered"),
+        'updated_at': fields.DateTime(readonly=True, description="date recipe got updated")
+    }
+)
 
 @recipes.route('/')
 class Recipes(Resource):
+    @recipes.marshal_with(recipe_model)
     def get(self):
         """
         Display all recipes of the user only

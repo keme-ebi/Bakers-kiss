@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# file for storing user authentication
+user.txt
+
 # Distribution / packaging
 .Python
 build/
