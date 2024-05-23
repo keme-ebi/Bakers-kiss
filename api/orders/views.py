@@ -31,7 +31,6 @@ place_order_model = orders.model(
         'description': fields.String(required=True, description="Details of the pastry needed by the client"),
         'price': fields.Float(required=True, description="negotiated price for the order"),
         'due_date': fields.Date(required=True, description="due date to deliver order")
-        # 'user_id': fields.Integer(required=True, description="current user id")
     }
 )
 
