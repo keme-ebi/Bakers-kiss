@@ -1,7 +1,8 @@
-from flask import request
+from flask import request, current_app
 from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import create_access_token,  create_refresh_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_mail import Message
 from http import HTTPStatus
 from ..models.user import User
 
@@ -52,6 +53,16 @@ class SignUp(Resource):
         )
 
         new_user.save()
+
+        recipient = [data.get('email')]
+
+        msg = Message(
+            "Bakers-kiss Account Creation",
+            recipients=recipient
+        )
+        msg.body = f"Congratulations, your account has been created successfully with username:{data.get('username')}, and email:{data.get('email')}"
+
+        current_app.mail.send(msg)
 
         return new_user, HTTPStatus.CREATED
 

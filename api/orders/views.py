@@ -135,6 +135,8 @@ class OneOrder(Resource):
             update_order.price = data['price']
         if 'due_date' in data:
             update_order.due_date = due_date
+        if 'completed' in data:
+            update_order.update_completion_status(data['completed'])
 
         db.session.commit()
 
