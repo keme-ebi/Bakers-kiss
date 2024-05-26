@@ -5,7 +5,11 @@ from flask import Flask
 from flask_restx import Api
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+<<<<<<< HEAD
 from flask_mail import Mail
+=======
+from werkzeug.exceptions import NotFound, MethodNotAllowed
+>>>>>>> 629454156f028da1a578fac00f87b854caee1610
 from .orders.views import orders
 from .auth.views import auth
 from .recipes.views import recipes
@@ -28,8 +32,26 @@ def create_app(config=config_dict['dev']):
 
     migrate = Migrate(app, db)
 
+<<<<<<< HEAD
     # flask_restx api instance
     api = Api(app)
+=======
+    authorizations = {
+        "Bearer Auth": {
+            "type": "apiKey",
+            "in" : "header",
+            "name": "Authorization",
+            "description": "Add a JWT with **Bearer &lt;JWT&gt;** to authorize"
+        }
+    }
+
+    api = Api(
+        app,
+        title="Bakers-kiss API", description="A REST API for bakers to keep track of their orders, store recipes and get reminders on when to restock",
+        authorizations=authorizations,
+        security="Bearer Auth"
+    )
+>>>>>>> 629454156f028da1a578fac00f87b854caee1610
 
     # flask-jwt instance
     jwt = JWTManager(app)
@@ -39,10 +61,21 @@ def create_app(config=config_dict['dev']):
     api.add_namespace(recipes)
     api.add_namespace(auth, path='/auth')
 
+<<<<<<< HEAD
     # flask-mail initialization
     mail = Mail(app)
 
     # for creation of database using "flask shell" command
+=======
+    @api.errorhandler(NotFound)
+    def not_found(error):
+        return {"error": "Ololololo"}, 404
+
+    @api.errorhandler(MethodNotAllowed)
+    def method_not_allowed(error):
+        return {"error": "method not allowed"}, 405
+
+>>>>>>> 629454156f028da1a578fac00f87b854caee1610
     @app.shell_context_processor
     def make_shell_context():
         return {

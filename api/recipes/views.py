@@ -28,6 +28,9 @@ input_recipe = recipes.model(
 @recipes.route('/')
 class Recipes(Resource):
     @recipes.marshal_with(recipe_model)
+    @recipes.doc(
+        description="Retrieves all recipes of an authorized user"
+    )
     @jwt_required()
     def get(self):
         """
@@ -46,6 +49,9 @@ class Recipes(Resource):
 
     @recipes.marshal_with(recipe_model)
     @recipes.expect(input_recipe)
+    @recipes.doc(
+        description="Input new recipe for an authorized user"
+    )
     @jwt_required()
     def post(self):
         """
@@ -77,6 +83,12 @@ class Recipes(Resource):
 @recipes.route('/<int:recipe_id>')
 class OneRecipe(Resource):
     @recipes.marshal_with(recipe_model)
+    @recipes.doc(
+        description="Retrive a recipe of an authorized user by its id",
+        params={
+            "recipe_id": "id of recipe to retrieve"
+        }
+    )
     @jwt_required()
     def get(self, recipe_id):
         """
@@ -97,6 +109,12 @@ class OneRecipe(Resource):
 
     @recipes.expect(input_recipe)
     @recipes.marshal_with(recipe_model)
+    @recipes.doc(
+        description="Updates a recipe of an authorized user by its id",
+        params={
+            "recipe_id": "id of recipe to update"
+        }
+    )
     @jwt_required()
     def put(self, recipe_id):
         """
@@ -118,6 +136,12 @@ class OneRecipe(Resource):
         return update_recipe, HTTPStatus.OK
 
     @recipes.marshal_with(recipe_model)
+    @recipes.doc(
+        description="Deletes a recipe of an authorized user by its id",
+        params={
+            "recipe_id": "id of recipe to delete"
+        }
+    )
     @jwt_required()
     def delete(self, recipe_id):
         """
