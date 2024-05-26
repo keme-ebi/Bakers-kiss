@@ -2,6 +2,7 @@ from flask import request
 from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import create_access_token,  create_refresh_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.exceptions import Conflict, BadRequest
 from http import HTTPStatus
 from ..models.user import User
 
@@ -45,15 +46,18 @@ class SignUp(Resource):
         """
         data = request.get_json()
 
-        new_user = User(
-            username = data.get('username'),
-            email = data.get('email'),
-            password = generate_password_hash(data.get('password'))
-        )
+        try:
+            new_user = User(
+                username = data.get('username'),
+                email = data.get('email'),
+                password = generate_password_hash(data.get('password'))
+            )
 
-        new_user.save()
+            new_user.save()
 
-        return new_user, HTTPStatus.CREATED
+            return new_user, HTTPStatus.CREATED
+        except Exception as e:
+            raise Conflict("Email already exists")
 
 @auth.route('/login')
 class Login(Resource):
@@ -79,6 +83,8 @@ class Login(Resource):
             }
 
             return response, HTTPStatus.OK
+
+        raise BadRequest("Invalid email or password")
 
 
 # This route can only be accessed if the user is authenticated

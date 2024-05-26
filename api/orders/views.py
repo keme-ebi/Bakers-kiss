@@ -37,6 +37,9 @@ place_order_model = orders.model(
 @orders.route('/')
 class Orders(Resource):
     @orders.marshal_with(order_model)
+    @orders.doc(
+        description="Retrieves all orders of an authorized user"
+    )
     @jwt_required()
     def get(self):
         """
@@ -55,6 +58,9 @@ class Orders(Resource):
 
     @orders.expect(place_order_model)
     @orders.marshal_with(order_model)
+    @orders.doc(
+        description="Input new order for an authorized user"
+    )
     @jwt_required()
     def post(self):
         """
@@ -92,6 +98,12 @@ class Orders(Resource):
 @orders.route('/<int:order_id>')
 class OneOrder(Resource):
     @orders.marshal_with(order_model)
+    @orders.doc(
+        description="Retrieve an order of an authorized user by its id",
+        params={
+            "order_id":"id of order to retrieve"
+        }
+    )
     @jwt_required()
     def get(self, order_id):
         """
@@ -112,6 +124,12 @@ class OneOrder(Resource):
 
     @orders.expect(order_model)
     @orders.marshal_with(order_model)
+    @orders.doc(
+        description="Updates an order of an authorized user by its id",
+        params={
+            "order_id": "id of order to update"
+        }
+    )
     @jwt_required()
     def put(self, order_id):
         """
@@ -141,6 +159,12 @@ class OneOrder(Resource):
         return update_order, HTTPStatus.OK
 
     @orders.marshal_with(order_model)
+    @orders.doc(
+        description="Deletes an order of an authorized user by its id",
+        params={
+            "order_id": "id of order to delete"
+        }
+    )
     @jwt_required()
     def delete(self, order_id):
         """
