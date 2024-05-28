@@ -5,6 +5,7 @@ from http import HTTPStatus
 from ..models.recipes import Recipe
 from ..models.user import User
 from ..utils import db
+from ..message.message import send_email
 
 recipes = Namespace('recipes', description="recipes namespace")
 
@@ -76,6 +77,10 @@ class Recipes(Resource):
 
             new_recipe.save()
 
+            msg = f"You just added a new recipe titled ({new_recipe.pastry_name}) to your list."
+
+            send_email('Bakers-kiss Recipe', msg, current_user.email)
+
             return new_recipe, HTTPStatus.CREATED
 
         return {'message': 'order not created'}, HTTPStatus.UNAUTHORIZED
@@ -122,7 +127,11 @@ class OneRecipe(Resource):
         Args:
             recipe_id(int): id of the recipe to update
         """
-        update_recipe = Recipe.query.filter_by(recipe_id=recipe_id).first()
+        username = get_jwt_identity()
+
+        current_user = User.query.filter_by(username=username).first()
+
+        update_recipe = Recipe.query.filter_by(user=current_user, recipe_id=recipe_id).first()
 
         data = recipes.payload
 
@@ -149,9 +158,16 @@ class OneRecipe(Resource):
         Args:
             recipe_id(int): id of the recipe to delete
         """
-        recipe = Recipe.query.filter_by(recipe_id=recipe_id).first()
+        username = get_jwt_identity()
+
+        current_user = User.query.filter_by(username=username).first()
+
+        recipe = Recipe.query.filter_by(user=current_user, recipe_id=recipe_id).first()
         
         if recipe:
+            msg = f"A deletion on a recipe title({recipe.pastry_name}) was carried out"
+
+            send_email('Bakers-kiss Recipe Deletion', msg, current_user.email)
             recipe.delete()
 
             return recipe, HTTPStatus.NO_CONTENT

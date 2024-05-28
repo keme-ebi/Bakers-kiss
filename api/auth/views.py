@@ -3,9 +3,9 @@ from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import create_access_token,  create_refresh_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.exceptions import Conflict, BadRequest
-from flask_mail import Message
 from http import HTTPStatus
 from ..models.user import User
+from ..message.message import send_email
 
 
 auth = Namespace('auth', description="authentication namespace")
@@ -21,7 +21,6 @@ signup_model = auth.model(
 
 user_model = auth.model(
     'User', {
-        'id': fields.Integer(),
         'username': fields.String(required=True, description="a username for the user"),
         'email': fields.String(required=True, description="user's email"),
         'password': fields.String(required=True, description="user's password"),
@@ -56,15 +55,11 @@ class SignUp(Resource):
 
             new_user.save()
 
-            recipient = [data.get('email')]
+            email = data.get('email')
 
-            msg = Message(
-                "Bakers-kiss Account Creation",
-                recipients=recipient
-            )
-            msg.body = f"Congratulations, your account has been created successfully with username:{data.get('username')}, and email:{data.get('email')}"
+            msg = f"Congratulations, your account has been created successfully with username:{data.get('username')}, and email:{email}"
 
-            current_app.mail.send(msg)
+            send_email("Bakers-kiss Account Creation", msg, email)
             return new_user, HTTPStatus.CREATED
         except Exception as e:
             raise Conflict("Email already exists")
