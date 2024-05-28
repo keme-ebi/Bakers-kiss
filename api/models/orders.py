@@ -11,6 +11,7 @@ class Order(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     due_date = db.Column(db.Date)
+    completed = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'), primary_key=True)
 
     def __repr__(self):

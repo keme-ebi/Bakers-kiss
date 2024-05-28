@@ -1,11 +1,13 @@
-from flask import request
+import uuid
+from flask import request, current_app
 from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from http import HTTPStatus
-from datetime import datetime
+from datetime import datetime, timedelta
 from ..models.orders import Order
 from ..models.user import User
 from ..utils import db
+from ..message.message import send_email
 
 orders = Namespace('orders', description="orders namespace")
 
@@ -15,10 +17,13 @@ order_model = orders.model(
         'order_id': fields.Integer(description="order number"),
         'client': fields.String(required=True, description="name of client"),
         'order_title': fields.String(required=True, description="title of the order e.g: wedding cake"),
+        'description': fields.String(required=True, description="description of the order"),
         'price': fields.Float(required=True, description="negotiated price for the order"),
         'created_at': fields.DateTime(readonly=True, description="date of order entry"),
         'updated_at': fields.DateTime(readonly=True, description="date order got edited"),
-        'due_date': fields.Date(required=True, description="due date to deliver order"),
+        'due_date': fields.Date(required=True,
+        description="due date to deliver order"),
+        'completed': fields.Boolean(description="oder completion status"),
         'user_id': fields.Integer(required=True)
     }
 )
@@ -30,12 +35,15 @@ place_order_model = orders.model(
         'order_title': fields.String(required=True, description="title of the order e.g: wedding cake"),
         'description': fields.String(required=True, description="Details of the pastry needed by the client"),
         'price': fields.Float(required=True, description="negotiated price for the order"),
-        'due_date': fields.Date(required=True, description="due date to deliver order")
+        'due_date': fields.Date(required=True, description="due date to deliver order"),
+        'completed': fields.Boolean(description="order completion status")
     }
 )
 
 @orders.route('/')
 class Orders(Resource):
+
+    # get all user orders
     @orders.marshal_with(order_model)
     @orders.doc(
         description="Retrieves all orders of an authorized user"
@@ -56,6 +64,7 @@ class Orders(Resource):
 
         return orders, HTTPStatus.OK
 
+    # post a new order
     @orders.expect(place_order_model)
     @orders.marshal_with(order_model)
     @orders.doc(
@@ -90,6 +99,10 @@ class Orders(Resource):
 
             new_order.save()
 
+            msg = f"You have set a new order titled({new_order.order_title}), for client({new_order.client}), to be delivered on or before ({new_order.due_date})"
+
+            send_email('Bakers-kiss Order Creation', msg, current_user.email)
+
             return new_order, HTTPStatus.CREATED
 
         return {'message': 'order not created'}, HTTPStatus.UNAUTHORIZED
@@ -97,6 +110,7 @@ class Orders(Resource):
 
 @orders.route('/<int:order_id>')
 class OneOrder(Resource):
+    # get a particular order
     @orders.marshal_with(order_model)
     @orders.doc(
         description="Retrieve an order of an authorized user by its id",
@@ -122,6 +136,7 @@ class OneOrder(Resource):
 
         return order, HTTPStatus.OK
 
+    # update a particular order
     @orders.expect(order_model)
     @orders.marshal_with(order_model)
     @orders.doc(
@@ -137,27 +152,57 @@ class OneOrder(Resource):
         Args:
             order_id(int): id to get specific order to update
         """
-        update_order = Order.query.filter_by(order_id=order_id).first()
+        username = get_jwt_identity()
+
+        current_user = User.query.filter_by(username=username).first()
+
+        update_order = Order.query.filter_by(user=current_user, order_id=order_id).first()
+
+        if not update_order:
+            return {"message": "Order Not Found"}, HTTPStatus.NOT_FOUND
+        
+        # recipient = [current_user.email]
 
         data = orders.payload
-
-        due_date = datetime.strptime(data.get('due_date'), '%Y-%m-%d').date()
 
         if 'client' in data:
             update_order.client = data['client']
         if 'order_title' in data:
             update_order.order_title = data['order_title']
-        if 'descripton' in data:
+        if 'description' in data:
             update_order.description = data['description']
         if 'price' in data:
             update_order.price = data['price']
         if 'due_date' in data:
-            update_order.due_date = due_date
+            update_order.due_date = datetime.strptime(data.get('due_date'), '%Y-%m-%d').date()
+        if 'completed' in data:
+            update_order.completed = data['completed']
+            # send message on completion
+            if update_order.completed:
+                #job_id = str(uuid.uuid4())
 
+                #run_date = datetime.utcnow() + timedelta(minutes=5)
+                msg = f"Congratulations, you completed order with title ({update_order.order_title}) from client ({update_order.client})"
+                email = current_user.email
+
+                send_email('Bakers-kiss', msg, email)
+                # current_app.scheduler.add_job(
+                #     func=send_email,
+                #     id=job_id,
+                #     trigger='date',
+                #     run_date=run_date,
+                #     args=[
+                #         'Bakers-kiss',
+                #         msg,
+                #         email
+                #     ]
+                # )
+                # current_app.scheduler.start()
         db.session.commit()
 
         return update_order, HTTPStatus.OK
 
+    # delete a particular order
     @orders.marshal_with(order_model)
     @orders.doc(
         description="Deletes an order of an authorized user by its id",
@@ -172,9 +217,16 @@ class OneOrder(Resource):
         Args:
             order_id(int): id to get specific order to delete
         """
-        order = Order.query.filter_by(order_id=order_id).first()
+        username = get_jwt_identity()
+
+        current_user = User.query.filter_by(username=username).first()
+
+        order = Order.query.filter_by(user=current_user, order_id=order_id).first()
         
         if order:
+            msg = f"You deleted an order for client({order.client}), with order title({order.order_title})"
+
+            send_email("Bakers-Kiss Order Deletion", msg, current_user.email)
             order.delete()
 
             return order, HTTPStatus.NO_CONTENT

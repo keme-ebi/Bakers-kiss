@@ -5,6 +5,10 @@ from flask import Flask
 from flask_restx import Api
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+from flask_mail import Mail
+# from flask_apscheduler import APScheduler
+# from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+# from apscheduler.executors.pool import ThreadPoolExecutor
 from werkzeug.exceptions import NotFound, MethodNotAllowed
 from .orders.views import orders
 from .auth.views import auth
@@ -20,8 +24,10 @@ def create_app(config=config_dict['dev']):
     """returns the application and hold configuration"""
     app = Flask(__name__)
 
+    # configuration of flask app
     app.config.from_object(config)
 
+    # database initialization
     db.init_app(app)
 
     migrate = Migrate(app, db)
@@ -35,19 +41,34 @@ def create_app(config=config_dict['dev']):
         }
     }
 
+    # flask_restx api instance
     api = Api(
         app,
-        title="Bakers-kiss API", description="A REST API for bakers to keep track of their orders, store recipes and get reminders on when to restock",
+        title="Bakers-kiss API",
+        description="A REST API for bakers to keep track of their orders, store recipes and get reminders on when to restock",
         authorizations=authorizations,
         security="Bearer Auth"
     )
 
+    # flask-jwt instance
     jwt = JWTManager(app)
 
+    # flask_restx routes/namespaces
     api.add_namespace(orders)
     api.add_namespace(recipes)
     api.add_namespace(auth, path='/auth')
 
+    # flask-mail initialization
+    mail = Mail(app)
+
+    # APScheduler initialization
+    # scheduler = APScheduler()
+    # scheduler.init_app(app)
+
+    # # executor
+    # scheduler.executor = ThreadPoolExecutor()
+
+    # for creation of database using "flask shell" command
     @api.errorhandler(NotFound)
     def not_found(error):
         return {"error": "Ololololo"}, 404
@@ -64,5 +85,12 @@ def create_app(config=config_dict['dev']):
             'Order': Order,
             'Recipe': Recipe
         }
+
+    # attach mail instance to the Flask application instance
+    app.mail = mail
+    #app.scheduler = scheduler
+
+    # start scheduler
+    #scheduler.start()
 
     return app
