@@ -46,12 +46,18 @@ class SignUp(Resource):
         """
         data = request.get_json()
 
+        if not data.get('password'):
+            return {"message": "empty"}, HTTPStatus.BAD_REQUEST
+
         try:
             new_user = User(
                 username = data.get('username'),
                 email = data.get('email'),
                 password = generate_password_hash(data.get('password'))
             )
+
+            if not new_user.username or not new_user.email:
+                return {"message": "a value is missing"}, BAD_REQUEST
 
             new_user.save()
 
