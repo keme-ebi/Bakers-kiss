@@ -25,7 +25,18 @@ class DevConfig(Config):
     MAIL_USE_SSL = False
 
 class TestConfig(Config):
-    pass
+    TESTING = True
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ECHO = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    MAIL_SERVER = 'smtp.gmail.com'
+    PORT = 587
+    MAIL_USERNAME = config('MAIL_USERNAME')
+    MAIL_PASSWORD = config('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = config('MAIL_DEFAULT_SENDER')
+    MAIL_USE_TLS = True
+    MAIL_USE_SSL = False
+    
 
 class ProdConfig(Config):
     pass
