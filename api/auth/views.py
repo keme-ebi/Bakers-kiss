@@ -12,7 +12,6 @@ auth = Namespace('auth', description="authentication namespace")
 
 signup_model = auth.model(
     'SignUp', {
-        'id': fields.Integer(),
         'username': fields.String(required=True, description="a username for the user"),
         'email': fields.String(required=True, description="user's email"),
         'password': fields.String(required=True, description="user's password")
@@ -21,6 +20,7 @@ signup_model = auth.model(
 
 user_model = auth.model(
     'User', {
+        'id': fields.Integer(),
         'username': fields.String(required=True, description="a username for the user"),
         'email': fields.String(required=True, description="user's email"),
         'password': fields.String(required=True, description="user's password"),
