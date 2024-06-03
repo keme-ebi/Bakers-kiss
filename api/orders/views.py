@@ -30,12 +30,23 @@ order_model = orders.model(
 
 # on what the post function is to expect
 place_order_model = orders.model(
-    'Order', {
+    'New_Order', {
         'client': fields.String(required=True, description="name of client"),
         'order_title': fields.String(required=True, description="title of the order e.g: wedding cake"),
         'description': fields.String(required=True, description="Details of the pastry needed by the client"),
         'price': fields.Float(required=True, description="negotiated price for the order"),
         'due_date': fields.Date(required=True, description="due date to deliver order")
+    }
+)
+
+update_order_model = orders.model(
+    'Update_Order', {
+        'client': fields.String(required=True, description="name of client"),
+        'order_title': fields.String(required=True, description="title of the order e.g: wedding cake"),
+        'description': fields.String(required=True, description="Details of the pastry needed by the client"),
+        'price': fields.Float(required=True, description="negotiated price for the order"),
+        'due_date': fields.Date(required=True, description="due date to deliver order"),
+        'completed': fields.Boolean(description="oder completion status")
     }
 )
 
@@ -136,7 +147,7 @@ class OneOrder(Resource):
         return order, HTTPStatus.OK
 
     # update a particular order
-    @orders.expect(order_model)
+    @orders.expect(update_order_model)
     @orders.marshal_with(order_model)
     @orders.doc(
         description="Updates an order of an authorized user by its id",
