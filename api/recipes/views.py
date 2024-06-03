@@ -13,6 +13,7 @@ recipe_model = recipes.model(
     'Recipes', {
         'recipe_id': fields.Integer(description="id of the recipe"),
         'pastry_name': fields.String(required=True, description="the name of pastry"),
+        'ingredients': fields.String(required=True, description="ingredients needed to make the pastry"),
         'recipe': fields.String(required=True, description="instructions on how to make the pastry"),
         'created_at': fields.DateTime(readonly=True, description="date recipe was entered"),
         'updated_at': fields.DateTime(readonly=True, description="date recipe got updated")
@@ -22,6 +23,7 @@ recipe_model = recipes.model(
 input_recipe = recipes.model(
     'NewRecipe', {
         'pastry_name': fields.String(required=True, description="the name of the pastry"),
+        'ingredients': fields.String(required=True, description="ingredients needed to make the pastry"),
         'recipe': fields.String(required=True, description="instructions on how to make the pastry")
     }
 )
@@ -71,6 +73,7 @@ class Recipes(Resource):
             new_recipe = Recipe(
                 recipe_id = new_recipe_id,
                 pastry_name = data.get('pastry_name'),
+                ingredients = data.get('ingredients'),
                 recipe = data.get('recipe'),
                 user_id = current_user.id
             )
@@ -137,8 +140,10 @@ class OneRecipe(Resource):
 
         if 'pastry_name' in data:
             update_recipe.pastry_name = data['pastry_name']
+        if 'ingredients' in data:
+            update_recipe.ingredients = data['ingredients']
         if 'recipe' in data:
-            update_order.recipe = data['recipe']
+            update_recipe.recipe = data['recipe']
 
         db.session.commit()
 
