@@ -1,4 +1,3 @@
-import uuid
 from flask import request, current_app
 from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -170,8 +169,6 @@ class OneOrder(Resource):
 
         if not update_order:
             return {"message": "Order Not Found"}, HTTPStatus.NOT_FOUND
-        
-        # recipient = [current_user.email]
 
         data = orders.payload
 
@@ -189,25 +186,10 @@ class OneOrder(Resource):
             update_order.completed = data['completed']
             # send message on completion
             if update_order.completed:
-                #job_id = str(uuid.uuid4())
-
-                #run_date = datetime.utcnow() + timedelta(minutes=5)
                 msg = f"Congratulations, you completed order with title ({update_order.order_title}) from client ({update_order.client})"
                 email = current_user.email
 
                 send_email('Bakers-kiss', msg, email)
-                # current_app.scheduler.add_job(
-                #     func=send_email,
-                #     id=job_id,
-                #     trigger='date',
-                #     run_date=run_date,
-                #     args=[
-                #         'Bakers-kiss',
-                #         msg,
-                #         email
-                #     ]
-                # )
-                # current_app.scheduler.start()
         db.session.commit()
 
         return update_order, HTTPStatus.OK
