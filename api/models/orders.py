@@ -4,8 +4,8 @@ from datetime import datetime
 class Order(db.Model):
     __tablename__ = 'orders'
     order_id = db.Column(db.Integer(), primary_key=True)
-    client = db.Column(db.String(), nullable=False)
-    order_title = db.Column(db.String())
+    client = db.Column(db.String(20), nullable=False)
+    order_title = db.Column(db.String(60))
     description = db.Column(db.Text())
     price = db.Column(db.Numeric(10, 2), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
