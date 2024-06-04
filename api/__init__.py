@@ -6,9 +6,6 @@ from flask_restx import Api
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_mail import Mail
-# from flask_apscheduler import APScheduler
-# from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-# from apscheduler.executors.pool import ThreadPoolExecutor
 from werkzeug.exceptions import NotFound, MethodNotAllowed
 from .orders.views import orders
 from .auth.views import auth
@@ -61,13 +58,6 @@ def create_app(config=config_dict['dev']):
     # flask-mail initialization
     mail = Mail(app)
 
-    # APScheduler initialization
-    # scheduler = APScheduler()
-    # scheduler.init_app(app)
-
-    # # executor
-    # scheduler.executor = ThreadPoolExecutor()
-
     # for creation of database using "flask shell" command
     @api.errorhandler(NotFound)
     def not_found(error):
@@ -88,9 +78,5 @@ def create_app(config=config_dict['dev']):
 
     # attach mail instance to the Flask application instance
     app.mail = mail
-    #app.scheduler = scheduler
-
-    # start scheduler
-    #scheduler.start()
 
     return app
