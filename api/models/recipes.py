@@ -5,8 +5,8 @@ from datetime import datetime
 class Recipe(db.Model):
     __tablename__ = 'recipes'
     recipe_id = db.Column(db.Integer(), primary_key=True)
-    pastry_name = db.Column(db.String(), nullable=False)
-    ingredients = db.Column(db.String(), nullable=False)
+    pastry_name = db.Column(db.String(50), nullable=False)
+    ingredients = db.Column(db.Text())
     recipe = db.Column(db.Text())
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
