@@ -29,6 +29,7 @@ The API service helps bakers to manage their activities like keep track of their
 
 ## Installation
 **NOTE:** This was done on linux
+
 - Clone or fork this repo
 ```$ git clone https://github.com/keme-ebi/Bakers-kiss.git```
 - Setup python virtual environment in the Bakers-kiss folder.
@@ -40,6 +41,7 @@ The API service helps bakers to manage their activities like keep track of their
 ```(env) :~/Bakers-kiss$ deactivate```
 - Install dependencies
 ```(env) :~/Bakers-kiss$ pip install -r requirements.txt```
+
 Environment for the project is setup.
 
 ## Usage
