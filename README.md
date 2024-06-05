@@ -1,14 +1,17 @@
 # Bakers-kiss
 Bakers-kiss is an API service for bakers to be able to manage their orders, store recipes (in order to avoid deterioration in case the recipe is primarily written on paper), keep their recipes secure and get notifications via email reminding them to stock up. This project is a Webstack: Portfolio Project, signaling the last phase of ALX SWE training, under the short specialisation. The project is aimed to showcase what the student can do having come so far into the program.
+
 ## Project Description
 ### What It Does
 The API service helps bakers to manage their activities like keep track of their orders and not forget due dates, store recipes for safe keeping (either by theft or deteriotation of the paper it was written on), and get reminder to stock up their ingredients.
+
 ### Technologies Used
 - Python programming language for its simplicity.
 - Flask for building the backend web application in Python. This was chosen since Flask is a light-weight and flexible micro-framework.
 - Flask-SQLALchemy for easy interaction with the database.
 - Flask-JWT for implementing authentication and authorization mechanisms which allows users to authenticate and access protected endpoints securely.
 - Flask-RESTX for documenting the API endpoints. Flask-RESTX makes it easier to automatically generate interactive API documentation from code annotations (using Swagger).
+- SQLite / MySQL for database.
 - Python virtual environment for managing dependencies used during the project development.
 - Git for version control, Github for hosting the repository.
 - sqlite for testing without having to use a complicated database during development stage.
@@ -23,6 +26,7 @@ The API service helps bakers to manage their activities like keep track of their
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [License](#license)
+
 ## Installation
 **NOTE:** This was done on linux
 - Clone or fork this repo
@@ -37,14 +41,28 @@ The API service helps bakers to manage their activities like keep track of their
 - Install dependencies
 ```(env) :~/Bakers-kiss$ pip install -r requirements.txt```
 Environment for the project is setup.
+
 ## Usage
-For testing, run:
+After activation of virtual environment run:
+
 ```(env) :~/Bakers-kiss$ export FLASK_APP=app/```
 
+Then open flask shell: ```(env) :~/Bakers-kiss$ flask shell```
+
+If you're using MySQL (**Make sure MySQL is running in the background first**) to run the program, edit the file **create_db.py** and put your credentials, then run it to create the database for the project. If you're using SQLite, skip this:
+
+```(env) :~/Bakers-kiss$ python create_db.py```
+
+Create the database in the shell and exit the shell:
+
+```>>> db.create_all()```
+
 After installation, run the server
+
 ```(env) :~/Bakers-kiss$ python server.py```
 
-**Open another terminal and access the [endpoints](#end-points)**
+**Open another terminal and access the [endpoints](#end-points) or test it directly in your browser by using [localhost:5000](http://localhost:5000)**
+
 ### End-Points
 This is a table of the API endpoints and their uses. The endpoints are used to access various routes provided after server has started runnning. Can be mocked using Postman or Insomnia according to your preferred choice.
 
@@ -66,17 +84,13 @@ This is a table of the API endpoints and their uses. The endpoints are used to a
 
 **NOTE**: Each routes except the signup and login, are jwt_required, so a token is needed to access other routes, this will ensure that a user is authorized.
 
-**NOTE**: Some actions sends a mail to user, so ensure you put a valid mail for testing purpose. You can create a fake mail from [ethereal.email](http://ethereal.email)
+**NOTE**: Some actions sends a mail to user, so ensure you put a valid mail for testing purpose. You can create a fake/dummy mail from [ethereal.email](http://ethereal.email)
 
 #### Sign a user up
 ```$ curl -X 'POST' 'http://localhost:5000/auth/signup' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{"username": "Nonso", "email": "testa@email.com", "password": "password"}'```
 
-On success returns:
-
 #### Login a user
 ```$ curl -X 'POST' 'http://localhost:5000/auth/login' -H 'accept: application/json' -H 'Content-Type: application/json' -d '{"email": "test@email.com", "password": "password"}'```
-
-On success returns:
 
 #### Place an order
 ```$ curl -X 'POST' 'http://localhost:5000/orders/' -H 'accept: application/json' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxNzM3MDIxNiwianRpIjoiMTc0MmVjZGEtMTE3OS00NjY0LTliMGEtMGIxNDUwYjk5YjllIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImthcmlhIiwibmJmIjoxNzE3MzcwMjE2LCJjc3JmIjoiZTIxZTkyYzMtY2FlZi00N2FlLTk0ZjItNTIyODA4NTgxMzJhIiwiZXhwIjoxNzE3MzcyMDE2fQ.P3KIZoFTKdEDMezHQQjlsVxZUKMew1BUqG66e-QTYAI' -H 'Content-Type: application/json' -d '{"client": "Tochi", "order_title": "birthday cake", "description": "1 layer red velvet, black whipped cream", "price": 30.49, "due_date": "2024-06-07"}'```
